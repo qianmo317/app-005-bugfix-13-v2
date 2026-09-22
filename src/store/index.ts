@@ -146,10 +146,7 @@ const appSlice = createSlice({
       }
     },
     deleteAllergy: (state, action: PayloadAction<string>) => {
-      const target = state.allergies.find(a => a.id === action.payload);
-      if (target) {
-        state.allergies = state.allergies.filter(a => a.allergen !== target.allergen);
-      }
+      state.allergies = state.allergies.filter(a => a.id !== action.payload);
       saveState(state);
     },
     addService: (state, action: PayloadAction<Service>) => {

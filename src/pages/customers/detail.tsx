@@ -133,23 +133,33 @@ const CustomerDetail: React.FC = () => {
     }
   };
 
-  const handleAddAllergy = async () => {
+  const handleSubmitAllergy = async () => {
     try {
       const values = await allergyForm.validateFields();
-      const allergy: Allergy = {
-        id: generateId(),
-        customerId: id!,
-        allergen: values.allergen,
-        severity: values.severity,
-        discoveredDate: values.discoveredDate
-          ? dayjs(values.discoveredDate).format('YYYY-MM-DD')
-          : new Date().toISOString().split('T')[0],
-        notes: values.notes || '',
-      };
-      dispatch(addAllergy(allergy));
+      const discoveredDate = values.discoveredDate
+        ? dayjs(values.discoveredDate).format('YYYY-MM-DD')
+        : new Date().toISOString().split('T')[0];
       if (editingAllergy) {
+        dispatch(
+          updateAllergy({
+            ...editingAllergy,
+            allergen: values.allergen,
+            severity: values.severity,
+            discoveredDate,
+            notes: values.notes || '',
+          })
+        );
         message.success('更新过敏史成功');
       } else {
+        const allergy: Allergy = {
+          id: generateId(),
+          customerId: id!,
+          allergen: values.allergen,
+          severity: values.severity,
+          discoveredDate,
+          notes: values.notes || '',
+        };
+        dispatch(addAllergy(allergy));
         message.success('添加过敏史成功');
       }
       setAllergyModal(false);
@@ -164,9 +174,9 @@ const CustomerDetail: React.FC = () => {
     setEditingAllergy(allergy);
     allergyForm.setFieldsValue({
       allergen: allergy.allergen,
-      severity: 'mild',
-      discoveredDate: dayjs(new Date().toISOString()),
-      notes: allergy.allergen,
+      severity: allergy.severity,
+      discoveredDate: dayjs(allergy.discoveredDate),
+      notes: allergy.notes,
     });
     setAllergyModal(true);
   };
@@ -603,7 +613,7 @@ const CustomerDetail: React.FC = () => {
       <Modal
         title={editingAllergy ? '编辑过敏史' : '添加过敏史'}
         open={allergyModal}
-        onOk={handleAddAllergy}
+        onOk={handleSubmitAllergy}
         onCancel={() => {
           setAllergyModal(false);
           setEditingAllergy(null);
