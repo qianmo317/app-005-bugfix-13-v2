@@ -137,8 +137,8 @@ const CustomerDetail: React.FC = () => {
     try {
       const values = await allergyForm.validateFields();
       const allergy: Allergy = {
-        id: generateId(),
-        customerId: id!,
+        id: editingAllergy ? editingAllergy.id : generateId(),
+        customerId: editingAllergy ? editingAllergy.customerId : id!,
         allergen: values.allergen,
         severity: values.severity,
         discoveredDate: values.discoveredDate
@@ -146,10 +146,11 @@ const CustomerDetail: React.FC = () => {
           : new Date().toISOString().split('T')[0],
         notes: values.notes || '',
       };
-      dispatch(addAllergy(allergy));
       if (editingAllergy) {
+        dispatch(updateAllergy(allergy));
         message.success('更新过敏史成功');
       } else {
+        dispatch(addAllergy(allergy));
         message.success('添加过敏史成功');
       }
       setAllergyModal(false);
@@ -164,9 +165,9 @@ const CustomerDetail: React.FC = () => {
     setEditingAllergy(allergy);
     allergyForm.setFieldsValue({
       allergen: allergy.allergen,
-      severity: 'mild',
-      discoveredDate: dayjs(new Date().toISOString()),
-      notes: allergy.allergen,
+      severity: allergy.severity,
+      discoveredDate: allergy.discoveredDate ? dayjs(allergy.discoveredDate) : null,
+      notes: allergy.notes,
     });
     setAllergyModal(true);
   };
